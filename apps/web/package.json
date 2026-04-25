@@ -1,0 +1,53 @@
+{
+  "name": "@apt-keeper/web",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --turbopack",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "next": "15.2.4",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "@supabase/supabase-js": "^2.43.0",
+    "@supabase/ssr": "^0.4.0",
+    "@upstash/redis": "^1.31.0",
+    "@upstash/qstash": "^2.7.0",
+    "firebase-admin": "^12.1.0",
+    "resend": "^3.2.0",
+    "twilio": "^5.1.0",
+    "stripe": "^15.7.0",
+    "@stripe/stripe-js": "^3.4.0",
+    "zod": "^3.23.0",
+    "date-fns": "^3.6.0",
+    "clsx": "^2.1.1",
+    "tailwind-merge": "^2.3.0",
+    "lucide-react": "^0.376.0",
+    "@radix-ui/react-dialog": "^1.0.5",
+    "@radix-ui/react-dropdown-menu": "^2.0.6",
+    "@radix-ui/react-select": "^2.0.0",
+    "@radix-ui/react-tabs": "^1.0.4",
+    "@radix-ui/react-toast": "^1.1.5",
+    "@radix-ui/react-label": "^2.0.2",
+    "@radix-ui/react-avatar": "^1.0.4",
+    "@radix-ui/react-separator": "^1.0.3",
+    "@radix-ui/react-slot": "^1.0.2",
+    "class-variance-authority": "^0.7.0",
+    "@apt-keeper/db": "workspace:*",
+    "@apt-keeper/ui": "workspace:*"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "15.2.4",
+    "tailwindcss": "^4",
+    "typescript": "^5"
+  }
+}

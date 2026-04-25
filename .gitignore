@@ -1,0 +1,38 @@
+# Dependencies
+node_modules
+.pnpm-store
+
+# Build outputs
+.next
+dist
+.expo
+*.tsbuildinfo
+
+# Environment
+.env
+.env.local
+.env*.local
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Turbo
+.turbo
+
+# Vercel
+.vercel
+
+# Expo
+.expo
+android
+ios
+
+# Supabase
+supabase/.branches
+supabase/.temp
