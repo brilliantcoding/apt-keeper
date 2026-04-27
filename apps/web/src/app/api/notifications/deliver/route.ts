@@ -10,7 +10,7 @@ async function handler(req: NextRequest) {
   const body = await req.json()
   const { invoice_id, stage, channels, invoice } = body
 
-  const supabase = await createAdminClient()
+  const supabase = createAdminClient()
   const resident = (invoice.leases as any)?.users
   if (!resident) return NextResponse.json({ error: 'No resident found' }, { status: 400 })
 

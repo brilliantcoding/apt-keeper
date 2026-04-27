@@ -1,4 +1,5 @@
-import type { BillSplitMethod } from './types'
+import type { Database } from './types'
+type BillSplitMethod = Database['public']['Enums']['bill_split_method']
 
 interface Unit {
   id: string
@@ -55,9 +56,13 @@ export function calculateSplit(
     }
 
     case 'fixed': {
-      const fixedAmounts = config.fixed_amounts as Record<string, number>
+      const fixedAmounts = config.fixed_amounts as Record<string, number> | undefined
+      // If no per-unit amounts configured, fall back to equal split
+      if (!fixedAmounts || Object.keys(fixedAmounts).length === 0) {
+        return calculateSplit(totalAmountCents, units, { method: 'equal', config: {} })
+      }
       return Object.fromEntries(
-        units.map((u) => [u.id, fixedAmounts?.[u.id] ?? 0])
+        units.map((u) => [u.id, fixedAmounts[u.id] ?? 0])
       )
     }
 

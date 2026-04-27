@@ -1,8 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useTransition, useRef } from 'react'
 import { Plus, X } from 'lucide-react'
-import { useRouter } from 'next/navigation'
+import { submitMaintenanceRequest } from '@/app/dashboard/actions'
 
 const PRIORITIES = [
   { value: 'P1', label: 'P1 — Emergency' },
@@ -13,31 +13,23 @@ const PRIORITIES = [
 
 export function NewRequestButton() {
   const [open, setOpen] = useState(false)
-  const [loading, setLoading] = useState(false)
-  const [title, setTitle] = useState('')
-  const [description, setDescription] = useState('')
-  const [priority, setPriority] = useState('P3')
-  const [photo, setPhoto] = useState<File | null>(null)
-  const router = useRouter()
+  const [error, setError] = useState<string | null>(null)
+  const [isPending, startTransition] = useTransition()
+  const formRef = useRef<HTMLFormElement>(null)
 
-  async function handleSubmit(e: React.FormEvent) {
+  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
-    setLoading(true)
-
-    const formData = new FormData()
-    formData.append('title', title)
-    formData.append('description', description)
-    formData.append('priority', priority)
-    if (photo) formData.append('photo', photo)
-
-    await fetch('/api/v1/maintenance-requests', { method: 'POST', body: formData })
-    setOpen(false)
-    setTitle('')
-    setDescription('')
-    setPriority('P3')
-    setPhoto(null)
-    setLoading(false)
-    router.refresh()
+    setError(null)
+    const formData = new FormData(e.currentTarget)
+    startTransition(async () => {
+      const result = await submitMaintenanceRequest(formData)
+      if (result?.error) {
+        setError(result.error)
+      } else {
+        setOpen(false)
+        formRef.current?.reset()
+      }
+    })
   }
 
   return (
@@ -65,15 +57,20 @@ export function NewRequestButton() {
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="p-5 space-y-4">
+            <form ref={formRef} onSubmit={handleSubmit} className="p-5 space-y-4">
+              {error && (
+                <div className="text-sm text-red-600 bg-red-50 dark:bg-red-900/20 rounded-lg px-4 py-3">
+                  {error}
+                </div>
+              )}
+
               <div>
                 <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
                   Title
                 </label>
                 <input
+                  name="title"
                   required
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
                   placeholder="e.g. Leaking faucet in bathroom"
                   className="w-full px-3 py-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-green-500"
                 />
@@ -84,9 +81,8 @@ export function NewRequestButton() {
                   Description
                 </label>
                 <textarea
+                  name="description"
                   required
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
                   rows={3}
                   placeholder="Describe the issue in detail…"
                   className="w-full px-3 py-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-green-500"
@@ -98,8 +94,8 @@ export function NewRequestButton() {
                   Priority
                 </label>
                 <select
-                  value={priority}
-                  onChange={(e) => setPriority(e.target.value)}
+                  name="priority"
+                  defaultValue="P3"
                   className="w-full px-3 py-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-green-500"
                 >
                   {PRIORITIES.map((p) => (
@@ -116,8 +112,8 @@ export function NewRequestButton() {
                 </label>
                 <input
                   type="file"
+                  name="photo"
                   accept="image/*"
-                  onChange={(e) => setPhoto(e.target.files?.[0] ?? null)}
                   className="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-green-50 file:text-green-700 file:font-semibold hover:file:bg-green-100"
                 />
               </div>
@@ -132,10 +128,10 @@ export function NewRequestButton() {
                 </button>
                 <button
                   type="submit"
-                  disabled={loading}
+                  disabled={isPending}
                   className="flex-1 py-2.5 bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white rounded-lg font-semibold transition-colors"
                 >
-                  {loading ? 'Submitting…' : 'Submit Request'}
+                  {isPending ? 'Submitting…' : 'Submit Request'}
                 </button>
               </div>
             </form>

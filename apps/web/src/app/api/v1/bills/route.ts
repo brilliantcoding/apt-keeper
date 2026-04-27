@@ -9,6 +9,7 @@ const CreateBillSchema = z.object({
   billing_period_start: z.string(),
   billing_period_end: z.string(),
   due_date: z.string(),
+  split_method: z.string().optional(),
   split_rule_id: z.string().uuid().optional(),
 })
 
@@ -40,10 +41,31 @@ export async function POST(req: NextRequest) {
   const parsed = CreateBillSchema.safeParse(body)
   if (!parsed.success) return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 })
 
-  const admin = await createAdminClient()
-  const { data, error } = await admin
+  const admin = createAdminClient()
+
+  // Create split rule server-side (bypasses RLS)
+  const { split_method, split_rule_id: incomingSplitRuleId, ...billFields } = parsed.data
+  let splitRuleId = incomingSplitRuleId ?? null
+
+  if (!splitRuleId && split_method) {
+    const { data: splitRule, error: splitErr } = await (admin as any)
+      .from('split_rules')
+      .insert({
+        property_id: parsed.data.property_id,
+        bill_type_id: parsed.data.bill_type_id,
+        method: split_method,
+        config: {},
+        effective_date: parsed.data.billing_period_start,
+      })
+      .select()
+      .single()
+    if (splitErr) return NextResponse.json({ error: splitErr.message }, { status: 500 })
+    splitRuleId = (splitRule as any).id
+  }
+
+  const { data, error } = await (admin as any)
     .from('bills')
-    .insert({ ...parsed.data, status: 'active' })
+    .insert({ ...billFields, split_rule_id: splitRuleId, status: 'active', created_by: user.id })
     .select()
     .single()
 

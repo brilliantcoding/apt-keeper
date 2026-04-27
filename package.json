@@ -10,6 +10,12 @@
     "type-check": "turbo run type-check",
     "format": "prettier --write \"**/*.{ts,tsx,md,json}\""
   },
+  "pnpm": {
+    "overrides": {
+      "react": "19.1.0",
+      "react-dom": "19.1.0"
+    }
+  },
   "devDependencies": {
     "turbo": "^2.0.0",
     "prettier": "^3.2.5",

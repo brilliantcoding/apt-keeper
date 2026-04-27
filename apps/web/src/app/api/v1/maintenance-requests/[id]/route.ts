@@ -9,7 +9,8 @@ const UpdateSchema = z.object({
   description: z.string().optional(),
 })
 
-export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
   const supabase = await createClient()
   const {
     data: { user },
@@ -20,11 +21,11 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
   const parsed = UpdateSchema.safeParse(body)
   if (!parsed.success) return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 })
 
-  const admin = await createAdminClient()
-  const { data, error } = await admin
+  const admin = createAdminClient()
+  const { data, error } = await (admin as any)
     .from('maintenance_requests')
     .update(parsed.data)
-    .eq('id', params.id)
+    .eq('id', id)
     .select()
     .single()
 

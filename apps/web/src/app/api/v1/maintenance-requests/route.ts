@@ -59,11 +59,11 @@ export async function POST(req: NextRequest) {
   const slaHours = SLA_HOURS[priority] ?? SLA_HOURS['P3']
   const slaDeadline = new Date(Date.now() + slaHours.resolution * 60 * 60 * 1000).toISOString()
 
-  const admin = await createAdminClient()
-  const { data: request, error } = await admin
+  const admin = createAdminClient()
+  const { data: request, error } = await (admin as any)
     .from('maintenance_requests')
     .insert({
-      unit_id: lease.unit_id,
+      unit_id: (lease as any).unit_id,
       resident_id: user.id,
       title,
       description,

@@ -1,26 +1,31 @@
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/server'
 import { formatCurrency } from '@/lib/utils'
 import { Receipt, Users, Wrench, TrendingUp } from 'lucide-react'
 
 export default async function AdminDashboard() {
-  const supabase = await createClient()
+  const supabase = createAdminClient()
 
   const [
     { count: totalInvoices },
     { data: overdueInvoices },
     { count: openRequests },
+    { count: activeLeases },
     { data: recentPayments },
   ] = await Promise.all([
-    supabase.from('invoices').select('*', { count: 'exact', head: true }),
-    supabase
+    (supabase as any).from('invoices').select('*', { count: 'exact', head: true }),
+    (supabase as any)
       .from('invoices')
       .select('amount_due, amount_paid')
       .eq('status', 'overdue'),
-    supabase
+    (supabase as any)
       .from('maintenance_requests')
       .select('*', { count: 'exact', head: true })
       .in('status', ['open', 'in_progress']),
-    supabase
+    (supabase as any)
+      .from('leases')
+      .select('*', { count: 'exact', head: true })
+      .eq('status', 'active'),
+    (supabase as any)
       .from('payments')
       .select('amount, paid_at, invoices(bills(bill_types(name)))')
       .eq('status', 'succeeded')
@@ -28,8 +33,8 @@ export default async function AdminDashboard() {
       .limit(5),
   ])
 
-  const totalOverdue = (overdueInvoices ?? []).reduce(
-    (sum, inv) => sum + (inv.amount_due - inv.amount_paid),
+  const totalOverdue = ((overdueInvoices ?? []) as any[]).reduce(
+    (sum: number, inv: any) => sum + (inv.amount_due - inv.amount_paid),
     0
   )
 
@@ -58,7 +63,7 @@ export default async function AdminDashboard() {
         />
         <StatCard
           label="Active Leases"
-          value="—"
+          value={String(activeLeases ?? 0)}
           icon={<Users className="w-5 h-5 text-blue-500" />}
         />
       </div>
@@ -66,7 +71,7 @@ export default async function AdminDashboard() {
       <section>
         <h2 className="text-lg font-semibold mb-3 text-slate-900 dark:text-white">Recent Payments</h2>
         <div className="bg-white dark:bg-slate-900 rounded-xl border divide-y divide-slate-100 dark:divide-slate-800">
-          {(recentPayments ?? []).map((p) => (
+          {((recentPayments ?? []) as any[]).map((p: any) => (
             <div key={(p as any).id} className="flex items-center justify-between px-5 py-4">
               <p className="text-slate-700 dark:text-slate-300">
                 {(p.invoices as any)?.bills?.bill_types?.name ?? 'Payment'}

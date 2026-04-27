@@ -16,7 +16,7 @@ const REMINDER_STAGES = [
 const qstash = new QStashClient({ token: process.env.QSTASH_TOKEN! })
 
 export async function POST(req: NextRequest) {
-  const supabase = await createAdminClient()
+  const supabase = createAdminClient()
   const now = new Date()
   const queued: string[] = []
 

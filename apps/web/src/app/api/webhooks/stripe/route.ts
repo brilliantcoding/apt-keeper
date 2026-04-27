@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
     const userId = session.metadata?.user_id
     if (!invoiceId) return NextResponse.json({ received: true })
 
-    const supabase = await createAdminClient()
+    const supabase = createAdminClient()
 
     await supabase.from('payments').insert({
       invoice_id: invoiceId,

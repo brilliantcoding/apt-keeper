@@ -11,6 +11,9 @@ import {
   Users,
   Settings,
   LogOut,
+  BarChart3,
+  Megaphone,
+  CreditCard,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { createClient } from '@/lib/supabase/client'
@@ -19,6 +22,7 @@ import { useRouter } from 'next/navigation'
 const residentNav = [
   { href: '/dashboard', label: 'Overview', icon: Home },
   { href: '/dashboard/bills', label: 'Bills', icon: Receipt },
+  { href: '/dashboard/payments', label: 'Payments', icon: CreditCard },
   { href: '/dashboard/maintenance', label: 'Maintenance', icon: Wrench },
   { href: '/dashboard/notifications', label: 'Notifications', icon: Bell },
 ]
@@ -26,9 +30,13 @@ const residentNav = [
 const adminNav = [
   { href: '/admin', label: 'Dashboard', icon: Home },
   { href: '/admin/bills', label: 'Bills', icon: Receipt },
+  { href: '/admin/invoices', label: 'Invoices', icon: Receipt },
   { href: '/admin/units', label: 'Units', icon: Building2 },
   { href: '/admin/maintenance', label: 'Maintenance', icon: Wrench },
   { href: '/admin/residents', label: 'Residents', icon: Users },
+  { href: '/admin/notifications', label: 'Notifications', icon: Bell },
+  { href: '/admin/notices', label: 'Notices', icon: Megaphone },
+  { href: '/admin/reports', label: 'Reports', icon: BarChart3 },
   { href: '/admin/settings', label: 'Settings', icon: Settings },
 ]
 

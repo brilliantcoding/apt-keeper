@@ -4,19 +4,18 @@ import { calculateSplit } from '@apt-keeper/db'
 import { randomUUID } from 'crypto'
 
 export async function POST(req: NextRequest) {
-  const supabase = await createAdminClient()
+  const supabase = createAdminClient()
   const generationBatchId = randomUUID()
 
   const now = new Date()
-  const periodStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString()
-  const periodEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString()
-  const dueDate = new Date(now.getFullYear(), now.getMonth() + 1, 15).toISOString()
+  const todayIso = now.toISOString()
 
+  // due_date is read per-bill below — no hardcoded date
   const { data: activeBills } = await supabase
     .from('bills')
-    .select('*, split_rules(*), properties(units(*, leases(*, resident_id)))')
+    .select('*, split_rules(*), properties(units(*, leases(*)))')
     .eq('status', 'active')
-    .lte('billing_period_start', periodStart)
+    .lte('billing_period_start', todayIso)
 
   if (!activeBills?.length) {
     return NextResponse.json({ message: 'No active bills', batch: generationBatchId })
@@ -29,7 +28,9 @@ export async function POST(req: NextRequest) {
     const units: any[] = property?.units ?? []
     const activeUnits = units.filter((u) => u.leases?.some((l: any) => l.status === 'active'))
 
-    const splitAmounts = calculateSplit(bill.amount, activeUnits, bill.split_rules)
+    const rawRule = bill.split_rules as any
+    const splitRule = Array.isArray(rawRule) ? (rawRule[0] ?? null) : (rawRule ?? null)
+    const splitAmounts = calculateSplit(bill.amount, activeUnits, splitRule)
 
     for (const unit of activeUnits) {
       const activeLease = unit.leases?.find((l: any) => l.status === 'active')
@@ -37,13 +38,12 @@ export async function POST(req: NextRequest) {
 
       const amount = splitAmounts[unit.id] ?? 0
 
-      // Idempotency check
+      // One invoice per bill+unit — no due_date in check to avoid duplicates
       const { data: existing } = await supabase
         .from('invoices')
         .select('id')
         .eq('bill_id', bill.id)
         .eq('unit_id', unit.id)
-        .eq('due_date', dueDate)
         .maybeSingle()
 
       if (!existing) {
@@ -54,7 +54,7 @@ export async function POST(req: NextRequest) {
           amount_due: amount,
           amount_paid: 0,
           status: 'pending',
-          due_date: dueDate,
+          due_date: (bill as any).due_date,
           generation_batch_id: generationBatchId,
         })
       }
