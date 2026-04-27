@@ -72,7 +72,7 @@ async function handler(req: NextRequest) {
 export async function POST(req: NextRequest) {
   if (process.env.QSTASH_CURRENT_SIGNING_KEY && process.env.QSTASH_NEXT_SIGNING_KEY) {
     const { verifySignatureAppRouter } = await import('@upstash/qstash/nextjs')
-    return verifySignatureAppRouter(handler)(req)
+    return verifySignatureAppRouter(handler as Parameters<typeof verifySignatureAppRouter>[0])(req)
   }
   return handler(req)
 }
