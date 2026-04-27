@@ -13,7 +13,7 @@ const REMINDER_STAGES = [
   { stage: 8, daysAfter: 30, channels: ['email', 'sms'] },
 ]
 
-const qstash = new QStashClient({ token: process.env.QSTASH_TOKEN! })
+function getQStash() { return new QStashClient({ token: process.env.QSTASH_TOKEN! }) }
 
 export async function POST(req: NextRequest) {
   const supabase = createAdminClient()
@@ -58,7 +58,7 @@ export async function POST(req: NextRequest) {
         status: 'queued',
       })
 
-      await qstash.publishJSON({
+      await getQStash().publishJSON({
         url: `${process.env.NEXT_PUBLIC_APP_URL}/api/notifications/deliver`,
         body: {
           invoice_id: invoice.id,

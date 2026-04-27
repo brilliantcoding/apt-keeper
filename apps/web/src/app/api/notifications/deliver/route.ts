@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { verifySignatureAppRouter } from '@upstash/qstash/nextjs'
 import { createAdminClient } from '@/lib/supabase/server'
 import { sendEmail, buildReminderEmail } from '@/lib/notifications/email'
 import { sendSms, buildReminderSms } from '@/lib/notifications/sms'
@@ -70,4 +69,10 @@ async function handler(req: NextRequest) {
   return NextResponse.json({ delivered: true, errors })
 }
 
-export const POST = verifySignatureAppRouter(handler)
+export async function POST(req: NextRequest) {
+  if (process.env.QSTASH_CURRENT_SIGNING_KEY && process.env.QSTASH_NEXT_SIGNING_KEY) {
+    const { verifySignatureAppRouter } = await import('@upstash/qstash/nextjs')
+    return verifySignatureAppRouter(handler)(req)
+  }
+  return handler(req)
+}

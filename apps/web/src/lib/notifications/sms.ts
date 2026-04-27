@@ -1,10 +1,9 @@
 import twilio from 'twilio'
 
-const client = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN)
-const FROM = process.env.TWILIO_PHONE_NUMBER!
-
 export async function sendSms(to: string, body: string) {
-  return client.messages.create({ from: FROM, to, body })
+  if (!process.env.TWILIO_ACCOUNT_SID || !process.env.TWILIO_AUTH_TOKEN) return
+  const client = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN)
+  return client.messages.create({ from: process.env.TWILIO_PHONE_NUMBER!, to, body })
 }
 
 export function buildReminderSms(params: {
