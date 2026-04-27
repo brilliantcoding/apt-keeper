@@ -72,7 +72,8 @@ async function handler(req: NextRequest) {
 export async function POST(req: NextRequest) {
   if (process.env.QSTASH_CURRENT_SIGNING_KEY && process.env.QSTASH_NEXT_SIGNING_KEY) {
     const { verifySignatureAppRouter } = await import('@upstash/qstash/nextjs')
-    return verifySignatureAppRouter(handler as Parameters<typeof verifySignatureAppRouter>[0])(req)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return verifySignatureAppRouter(handler as unknown as any)(req)
   }
   return handler(req)
 }
