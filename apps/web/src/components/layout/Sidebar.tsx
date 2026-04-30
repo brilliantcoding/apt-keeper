@@ -14,6 +14,7 @@ import {
   BarChart3,
   Megaphone,
   CreditCard,
+  KeyRound,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { createClient } from '@/lib/supabase/client'
@@ -37,6 +38,7 @@ const adminNav = [
   { href: '/admin/notifications', label: 'Notifications', icon: Bell },
   { href: '/admin/notices', label: 'Notices', icon: Megaphone },
   { href: '/admin/reports', label: 'Reports', icon: BarChart3 },
+  { href: '/admin/activation-codes', label: 'Access Codes', icon: KeyRound },
   { href: '/admin/settings', label: 'Settings', icon: Settings },
 ]
 

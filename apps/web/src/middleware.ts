@@ -30,8 +30,8 @@ export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
   // Public routes
-  if (pathname.startsWith('/login') || pathname.startsWith('/auth')) {
-    if (user) {
+  if (pathname.startsWith('/login') || pathname.startsWith('/auth') || pathname.startsWith('/activate')) {
+    if (user && !pathname.startsWith('/activate')) {
       const url = request.nextUrl.clone()
       url.pathname = '/dashboard'
       return NextResponse.redirect(url)
@@ -39,11 +39,29 @@ export async function middleware(request: NextRequest) {
     return supabaseResponse
   }
 
-  // Protected routes
+  // Protected routes — must be logged in
   if (!user && (pathname.startsWith('/dashboard') || pathname.startsWith('/admin'))) {
     const url = request.nextUrl.clone()
     url.pathname = '/login'
     return NextResponse.redirect(url)
+  }
+
+  // Activation gate — residents without an activation code go to /activate
+  if (user && pathname.startsWith('/dashboard')) {
+    const { createAdminClient } = await import('@/lib/supabase/server')
+    const admin = createAdminClient()
+    const { data: profile } = await (admin as any)
+      .from('users')
+      .select('role, activation_code_id')
+      .eq('id', user.id)
+      .single()
+
+    const isAdmin = ['manager', 'super_admin', 'staff'].includes(profile?.role)
+    if (!isAdmin && !profile?.activation_code_id) {
+      const url = request.nextUrl.clone()
+      url.pathname = '/activate'
+      return NextResponse.redirect(url)
+    }
   }
 
   // Cron routes — require secret header
