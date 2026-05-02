@@ -30,7 +30,7 @@ export default function ActivatePage() {
     }
 
     setSuccess(true)
-    setTimeout(() => router.push('/dashboard'), 1500)
+    setTimeout(() => { window.location.href = '/dashboard' }, 1500)
   }
 
   // Auto-format input as APT-XXXX-XXXX

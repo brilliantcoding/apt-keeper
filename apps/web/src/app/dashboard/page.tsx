@@ -3,6 +3,7 @@ import { formatCurrency, formatDate } from '@/lib/utils'
 import { Receipt, Wrench, AlertCircle, CheckCircle } from 'lucide-react'
 import { PayButton } from '@/components/bills/PayButton'
 import { MaintenanceRequestCard } from '@/components/maintenance/MaintenanceRequestCard'
+import Link from 'next/link'
 
 export default async function ResidentDashboard() {
   const supabase = await createClient()
@@ -68,9 +69,9 @@ export default async function ResidentDashboard() {
 
       {/* Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <StatCard label="Total Due" value={formatCurrency(totalDue)} icon={<Receipt className="w-5 h-5 text-green-600" />} accent="green" />
-        <StatCard label="Overdue Bills" value={String(overdueCount)} icon={<AlertCircle className="w-5 h-5 text-red-500" />} accent={overdueCount > 0 ? 'red' : 'slate'} />
-        <StatCard label="Open Requests" value={String(requests?.length ?? 0)} icon={<Wrench className="w-5 h-5 text-amber-500" />} accent="amber" />
+        <StatCard label="Total Due" value={formatCurrency(totalDue)} icon={<Receipt className="w-5 h-5 text-green-600" />} accent="green" href="/dashboard/bills" />
+        <StatCard label="Overdue Bills" value={String(overdueCount)} icon={<AlertCircle className="w-5 h-5 text-red-500" />} accent={overdueCount > 0 ? 'red' : 'slate'} href="/dashboard/bills" />
+        <StatCard label="Open Requests" value={String(requests?.length ?? 0)} icon={<Wrench className="w-5 h-5 text-amber-500" />} accent="amber" href="/dashboard/maintenance" />
       </div>
 
       {/* Pending invoices */}
@@ -128,15 +129,15 @@ export default async function ResidentDashboard() {
   )
 }
 
-function StatCard({ label, value, icon, accent }: { label: string; value: string; icon: React.ReactNode; accent: string }) {
+function StatCard({ label, value, icon, accent, href }: { label: string; value: string; icon: React.ReactNode; accent: string; href: string }) {
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-xl border p-5 flex items-center gap-4">
-      <div className={`w-11 h-11 rounded-xl bg-${accent}-50 dark:bg-${accent}-900/20 flex items-center justify-center`}>{icon}</div>
+    <Link href={href} className="bg-white dark:bg-slate-900 rounded-xl border p-5 flex items-center gap-4 hover:shadow-md hover:border-slate-300 dark:hover:border-slate-600 transition-all">
+      <div className={`w-11 h-11 rounded-xl bg-${accent}-50 dark:bg-${accent}-900/20 flex items-center justify-center shrink-0`}>{icon}</div>
       <div>
         <p className="text-2xl font-bold text-slate-900 dark:text-white">{value}</p>
         <p className="text-sm text-slate-500">{label}</p>
       </div>
-    </div>
+    </Link>
   )
 }
 

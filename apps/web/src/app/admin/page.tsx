@@ -1,6 +1,7 @@
 import { createAdminClient } from '@/lib/supabase/server'
 import { formatCurrency } from '@/lib/utils'
 import { Receipt, Users, Wrench, TrendingUp } from 'lucide-react'
+import Link from 'next/link'
 
 export default async function AdminDashboard() {
   const supabase = createAdminClient()
@@ -46,26 +47,10 @@ export default async function AdminDashboard() {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard
-          label="Total Invoices"
-          value={String(totalInvoices ?? 0)}
-          icon={<Receipt className="w-5 h-5 text-green-600" />}
-        />
-        <StatCard
-          label="Overdue Amount"
-          value={formatCurrency(totalOverdue)}
-          icon={<TrendingUp className="w-5 h-5 text-red-500" />}
-        />
-        <StatCard
-          label="Open Requests"
-          value={String(openRequests ?? 0)}
-          icon={<Wrench className="w-5 h-5 text-amber-500" />}
-        />
-        <StatCard
-          label="Active Leases"
-          value={String(activeLeases ?? 0)}
-          icon={<Users className="w-5 h-5 text-blue-500" />}
-        />
+        <StatCard label="Total Invoices"  value={String(totalInvoices ?? 0)}   icon={<Receipt    className="w-5 h-5 text-green-600" />} href="/admin/invoices"     />
+        <StatCard label="Overdue Amount"  value={formatCurrency(totalOverdue)} icon={<TrendingUp className="w-5 h-5 text-red-500"   />} href="/admin/invoices"     />
+        <StatCard label="Open Requests"   value={String(openRequests ?? 0)}    icon={<Wrench     className="w-5 h-5 text-amber-500" />} href="/admin/maintenance"  />
+        <StatCard label="Active Leases"   value={String(activeLeases ?? 0)}    icon={<Users      className="w-5 h-5 text-blue-500"  />} href="/admin/residents"    />
       </div>
 
       <section>
@@ -91,16 +76,16 @@ export default async function AdminDashboard() {
   )
 }
 
-function StatCard({ label, value, icon }: { label: string; value: string; icon: React.ReactNode }) {
+function StatCard({ label, value, icon, href }: { label: string; value: string; icon: React.ReactNode; href: string }) {
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-xl border p-5 flex items-center gap-4">
-      <div className="w-11 h-11 rounded-xl bg-slate-50 dark:bg-slate-800 flex items-center justify-center">
+    <Link href={href} className="bg-white dark:bg-slate-900 rounded-xl border p-5 flex items-center gap-4 hover:shadow-md hover:border-slate-300 dark:hover:border-slate-600 transition-all">
+      <div className="w-11 h-11 rounded-xl bg-slate-50 dark:bg-slate-800 flex items-center justify-center shrink-0">
         {icon}
       </div>
       <div>
         <p className="text-2xl font-bold text-slate-900 dark:text-white">{value}</p>
         <p className="text-sm text-slate-500">{label}</p>
       </div>
-    </div>
+    </Link>
   )
 }
