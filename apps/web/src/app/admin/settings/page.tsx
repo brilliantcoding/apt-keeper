@@ -11,7 +11,7 @@ export default async function AdminSettingsPage() {
 
   const adminClient = createAdminClient()
 
-  const [{ data: properties }, { data: profile }, { data: billTypes }] = await Promise.all([
+  const [{ data: properties }, { data: profile }, { data: billTypes }, { data: billUsage }] = await Promise.all([
     (adminClient as any)
       .from('properties')
       .select('id, name, address, created_at, payments_enabled')
@@ -26,7 +26,15 @@ export default async function AdminSettingsPage() {
       .from('bill_types')
       .select('*')
       .order('name'),
+    // Which bill_type_ids are referenced by at least one bill?
+    (adminClient as any)
+      .from('bills')
+      .select('bill_type_id'),
   ])
+
+  const usedBillTypeIds = new Set(
+    ((billUsage ?? []) as any[]).map((b: any) => b.bill_type_id).filter(Boolean)
+  )
 
   return (
     <div className="space-y-8 max-w-3xl">
@@ -81,7 +89,7 @@ export default async function AdminSettingsPage() {
           <Zap className="w-5 h-5" />
           Bill Types
         </h2>
-        <BillTypeManager billTypes={(billTypes ?? []) as any[]} />
+        <BillTypeManager billTypes={(billTypes ?? []) as any[]} usedIds={usedBillTypeIds} />
       </section>
     </div>
   )
