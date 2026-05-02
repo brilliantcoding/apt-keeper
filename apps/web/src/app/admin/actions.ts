@@ -45,6 +45,18 @@ export async function updateProperty(id: string, name: string, address: string) 
   return { error: null }
 }
 
+export async function togglePropertyPayments(id: string, enabled: boolean) {
+  const supabase = createAdminClient()
+  const { error } = await (supabase as any)
+    .from('properties')
+    .update({ payments_enabled: enabled })
+    .eq('id', id)
+  if (error) return { error: (error as any).message }
+  revalidatePath('/admin/settings')
+  revalidatePath('/dashboard/bills')
+  return { error: null }
+}
+
 export async function deleteProperty(id: string) {
   const supabase = createAdminClient()
   const { error } = await (supabase as any)

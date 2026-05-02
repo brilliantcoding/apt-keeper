@@ -23,6 +23,17 @@ export default async function ResidentBillsPage() {
     .in('lease_id', safeLeaseIds)
     .order('due_date', { ascending: false })
 
+  // Check if payments are enabled for the resident's property
+  const { data: leaseWithUnit } = leaseIds.length
+    ? await (admin as any)
+        .from('leases')
+        .select('units(properties(payments_enabled))')
+        .in('id', leaseIds)
+        .limit(1)
+        .single()
+    : { data: null }
+  const paymentsEnabled = leaseWithUnit?.units?.properties?.payments_enabled ?? false
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -74,7 +85,7 @@ export default async function ResidentBillsPage() {
                       >
                         PDF
                       </a>
-                      {inv.status !== 'paid' && remaining > 0 && (
+                      {inv.status !== 'paid' && remaining > 0 && paymentsEnabled && (
                         <PayButton invoiceId={inv.id} amount={remaining} />
                       )}
                     </div>

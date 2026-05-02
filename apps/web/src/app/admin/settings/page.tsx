@@ -14,7 +14,7 @@ export default async function AdminSettingsPage() {
   const [{ data: properties }, { data: profile }, { data: billTypes }] = await Promise.all([
     (adminClient as any)
       .from('properties')
-      .select('*')
+      .select('id, name, address, created_at, payments_enabled')
       .eq('manager_id', user!.id)
       .order('created_at', { ascending: true }),
     (adminClient as any)
