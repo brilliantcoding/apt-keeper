@@ -13,6 +13,23 @@ export async function updateCurrency(currency: string) {
   return { error: null }
 }
 
+export async function sendPasswordReset(userId: string) {
+  const supabase = createAdminClient()
+  const { data: userData } = await (supabase as any)
+    .from('users')
+    .select('email')
+    .eq('id', userId)
+    .single()
+  if (!userData?.email) return { error: 'User not found' }
+  const { error } = await (supabase as any).auth.admin.generateLink({
+    type: 'recovery',
+    email: userData.email,
+    options: { redirectTo: `${process.env.NEXT_PUBLIC_APP_URL ?? 'https://apt-keeper.vercel.app'}/reset-password` },
+  })
+  if (error) return { error: (error as any).message }
+  return { error: null }
+}
+
 function revalidateAdminRoutes() {
   revalidatePath('/admin/settings')
   revalidatePath('/admin/units')

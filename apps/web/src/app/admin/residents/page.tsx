@@ -3,6 +3,7 @@ import { formatDate, formatCurrency } from '@/lib/utils'
 import { getCurrency } from '@/lib/currency'
 import { Users } from 'lucide-react'
 import { AssignLeaseModal } from '@/components/admin/AssignLeaseModal'
+import { ResetPasswordButton } from '@/components/admin/ResetPasswordButton'
 
 export default async function AdminResidentsPage() {
   const authClient = await createClient()
@@ -89,6 +90,7 @@ export default async function AdminResidentsPage() {
               <th className="px-5 py-3 font-semibold text-slate-600 dark:text-slate-400">Lease</th>
               <th className="px-5 py-3 font-semibold text-slate-600 dark:text-slate-400">Outstanding</th>
               <th className="px-5 py-3 font-semibold text-slate-600 dark:text-slate-400">Status</th>
+              <th className="px-5 py-3 font-semibold text-slate-600 dark:text-slate-400">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
@@ -145,6 +147,9 @@ export default async function AdminResidentsPage() {
                     >
                       {lease ? 'Active' : 'No lease'}
                     </span>
+                  </td>
+                  <td className="px-5 py-4">
+                    <ResetPasswordButton userId={resident.id} email={resident.email ?? ''} />
                   </td>
                 </tr>
               )
