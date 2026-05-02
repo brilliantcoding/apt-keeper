@@ -45,7 +45,7 @@ export default async function ActivationCodesPage() {
       </div>
 
       {/* Codes table */}
-      <div className="bg-white dark:bg-slate-900 rounded-xl border overflow-hidden">
+      <div className="bg-white dark:bg-slate-900 rounded-xl border overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
             <tr className="bg-slate-50 dark:bg-slate-800 text-left">

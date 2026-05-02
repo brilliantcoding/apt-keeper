@@ -121,7 +121,7 @@ export default async function AdminNotificationsPage() {
           <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">
             Upcoming Reminders
           </h2>
-          <div className="bg-white dark:bg-slate-900 rounded-xl border overflow-hidden">
+          <div className="bg-white dark:bg-slate-900 rounded-xl border overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="bg-slate-50 dark:bg-slate-800 text-left">
@@ -175,7 +175,7 @@ export default async function AdminNotificationsPage() {
             No reminders sent yet.
           </div>
         ) : (
-          <div className="bg-white dark:bg-slate-900 rounded-xl border overflow-hidden">
+          <div className="bg-white dark:bg-slate-900 rounded-xl border overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="bg-slate-50 dark:bg-slate-800 text-left">

@@ -99,7 +99,7 @@ export default async function PaymentsPage() {
       </div>
 
       {/* Payments table */}
-      <div className="bg-white dark:bg-slate-900 rounded-xl border overflow-hidden">
+      <div className="bg-white dark:bg-slate-900 rounded-xl border overflow-x-auto">
         {!payments?.length ? (
           <div className="py-16 text-center text-slate-400">
             <CreditCard className="w-8 h-8 mx-auto mb-3 opacity-40" />
