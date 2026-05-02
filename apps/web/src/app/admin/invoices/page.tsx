@@ -1,9 +1,11 @@
 import { createAdminClient } from '@/lib/supabase/server'
 import { formatCurrency, formatDate } from '@/lib/utils'
+import { getCurrency } from '@/lib/currency'
 import { Receipt } from 'lucide-react'
 
 export default async function AdminInvoicesPage() {
   const supabase = createAdminClient()
+  const currency = await getCurrency()
 
   const { data: invoices } = await (supabase as any)
     .from('invoices')
@@ -45,8 +47,8 @@ export default async function AdminInvoicesPage() {
 
       {/* Stats */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <StatCard label="Total Billed" value={formatCurrency(totalDue)} color="slate" />
-        <StatCard label="Collected" value={formatCurrency(totalPaid)} color="green" />
+        <StatCard label="Total Billed" value={formatCurrency(totalDue, currency)} color="slate" />
+        <StatCard label="Collected" value={formatCurrency(totalPaid, currency)} color="green" />
         <StatCard label="Pending" value={String(pendingCount)} color="amber" />
         <StatCard label="Overdue" value={String(overdueCount)} color="red" />
       </div>
@@ -91,16 +93,16 @@ export default async function AdminInvoicesPage() {
                     <p className="text-xs text-slate-400 capitalize">{billType?.category}</p>
                   </td>
                   <td className="px-5 py-4 font-semibold text-slate-900 dark:text-white">
-                    {formatCurrency(inv.amount_due)}
+                    {formatCurrency(inv.amount_due, currency)}
                   </td>
                   <td className="px-5 py-4">
                     {inv.amount_paid > 0 ? (
-                      <span className="text-green-600 font-semibold">{formatCurrency(inv.amount_paid)}</span>
+                      <span className="text-green-600 font-semibold">{formatCurrency(inv.amount_paid, currency)}</span>
                     ) : (
                       <span className="text-slate-400">—</span>
                     )}
                     {remaining > 0 && inv.amount_paid > 0 && (
-                      <p className="text-xs text-slate-400">{formatCurrency(remaining)} left</p>
+                      <p className="text-xs text-slate-400">{formatCurrency(remaining, currency)} left</p>
                     )}
                   </td>
                   <td className="px-5 py-4 text-slate-500 text-xs">{formatDate(inv.due_date)}</td>

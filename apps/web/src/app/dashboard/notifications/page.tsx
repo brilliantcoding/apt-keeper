@@ -1,5 +1,6 @@
 import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { formatCurrency, formatDate } from '@/lib/utils'
+import { getCurrency } from '@/lib/currency'
 import {
   Bell,
   Mail,
@@ -30,6 +31,7 @@ export default async function NotificationsPage() {
   const {
     data: { user },
   } = await supabase.auth.getUser()
+  const currency = await getCurrency()
 
   const admin = createAdminClient()
 
@@ -99,7 +101,7 @@ export default async function NotificationsPage() {
       id: `inv-${inv.id}`,
       icon: <Receipt className="w-4 h-4 text-green-600" />,
       title: `Invoice: ${inv.bills?.bill_types?.name ?? 'Bill'}`,
-      subtitle: formatCurrency(inv.amount_due),
+      subtitle: formatCurrency(inv.amount_due, currency),
       date: inv.created_at,
       badgeColor:
         inv.status === 'overdue'

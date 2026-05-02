@@ -1,5 +1,6 @@
 import { createClient, createAdminClient } from "@/lib/supabase/server"
 import { formatCurrency, formatDate } from '@/lib/utils'
+import { getCurrency } from '@/lib/currency'
 import { Receipt } from 'lucide-react'
 import { CreateBillModal } from '@/components/admin/CreateBillModal'
 import { EditBillModal } from '@/components/admin/EditBillModal'
@@ -9,6 +10,7 @@ export default async function AdminBillsPage() {
   const authClient = await createClient()
   const supabase = createAdminClient()
   const { data: { user } } = await authClient.auth.getUser()
+  const currency = await getCurrency()
 
   const [{ data: bills }, { data: properties }, { data: billTypes }] = await Promise.all([
     supabase
@@ -86,7 +88,7 @@ export default async function AdminBillsPage() {
                     {formatDate(bill.billing_period_start)} – {formatDate(bill.billing_period_end)}
                   </td>
                   <td className="px-5 py-4 font-semibold text-slate-900 dark:text-white">
-                    {formatCurrency(bill.amount)}
+                    {formatCurrency(bill.amount, currency)}
                   </td>
                   <td className="px-5 py-4 text-slate-600 dark:text-slate-400">
                     {formatDate(bill.due_date)}
@@ -102,7 +104,7 @@ export default async function AdminBillsPage() {
                           style={{ width: totalDue > 0 ? `${Math.min(100, (totalPaid / totalDue) * 100)}%` : '0%' }}
                         />
                       </div>
-                      <span className="text-xs text-slate-500">{formatCurrency(totalPaid)}</span>
+                      <span className="text-xs text-slate-500">{formatCurrency(totalPaid, currency)}</span>
                     </div>
                   </td>
                   <td className="px-5 py-4 text-right">

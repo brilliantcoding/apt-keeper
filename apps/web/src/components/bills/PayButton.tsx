@@ -39,7 +39,7 @@ function inputCls(hasVal: boolean) {
   return `w-full px-3 py-2.5 rounded-xl border text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-400 outline-none focus:ring-2 focus:ring-green-500 transition ${hasVal ? 'border-slate-300 dark:border-slate-600' : 'border-slate-200 dark:border-slate-700'}`
 }
 
-export function PayButton({ invoiceId, amount }: { invoiceId: string; amount: number }) {
+export function PayButton({ invoiceId, amount, currency = 'USD' }: { invoiceId: string; amount: number; currency?: string }) {
   const [open, setOpen]     = useState(false)
   const [method, setMethod] = useState('card')
   const [loading, setLoading] = useState(false)
@@ -116,7 +116,7 @@ export function PayButton({ invoiceId, amount }: { invoiceId: string; amount: nu
         onClick={() => setOpen(true)}
         className="px-4 py-1.5 bg-green-600 hover:bg-green-700 text-white text-xs font-semibold rounded-lg transition-colors"
       >
-        Pay {formatCurrency(amount)}
+        Pay {formatCurrency(amount, currency)}
       </button>
 
       {open && (
@@ -127,7 +127,7 @@ export function PayButton({ invoiceId, amount }: { invoiceId: string; amount: nu
             <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-slate-100 dark:border-slate-800 sticky top-0 bg-white dark:bg-slate-900 z-10">
               <div>
                 <h2 className="text-lg font-bold text-slate-900 dark:text-white">Make a Payment</h2>
-                <p className="text-sm text-slate-500 mt-0.5">Amount: <span className="font-semibold text-slate-900 dark:text-white">{formatCurrency(amount)}</span></p>
+                <p className="text-sm text-slate-500 mt-0.5">Amount: <span className="font-semibold text-slate-900 dark:text-white">{formatCurrency(amount, currency)}</span></p>
               </div>
               <button onClick={() => { setOpen(false); resetForms() }} className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400">
                 <X className="w-4 h-4" />
@@ -138,7 +138,7 @@ export function PayButton({ invoiceId, amount }: { invoiceId: string; amount: nu
               <div className="px-6 py-14 flex flex-col items-center gap-3">
                 <CheckCircle2 className="w-16 h-16 text-green-500" />
                 <p className="text-lg font-bold text-slate-900 dark:text-white">Payment Successful!</p>
-                <p className="text-sm text-slate-500 text-center">{formatCurrency(amount)} paid via {successMsg}</p>
+                <p className="text-sm text-slate-500 text-center">{formatCurrency(amount, currency)} paid via {successMsg}</p>
               </div>
             ) : (
               <div className="px-6 py-5 space-y-5">
@@ -299,7 +299,7 @@ export function PayButton({ invoiceId, amount }: { invoiceId: string; amount: nu
                 {/* Amount summary */}
                 <div className="bg-slate-50 dark:bg-slate-800 rounded-xl px-4 py-3 flex justify-between items-center">
                   <span className="text-sm text-slate-500">Total to pay</span>
-                  <span className="text-lg font-bold text-slate-900 dark:text-white">{formatCurrency(amount)}</span>
+                  <span className="text-lg font-bold text-slate-900 dark:text-white">{formatCurrency(amount, currency)}</span>
                 </div>
 
                 {/* Actions */}

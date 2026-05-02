@@ -1,5 +1,6 @@
 import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { formatCurrency, formatDate } from '@/lib/utils'
+import { getCurrency } from '@/lib/currency'
 import { CreditCard, Building2, Landmark, CheckCircle2, Clock } from 'lucide-react'
 
 function parseMethod(raw: string): {
@@ -48,6 +49,7 @@ export default async function PaymentsPage() {
   const { data: { user } } = await supabase.auth.getUser()
 
   const admin = createAdminClient()
+  const currency = await getCurrency()
 
   const { data: leases } = await (admin as any)
     .from('leases')
@@ -89,7 +91,7 @@ export default async function PaymentsPage() {
       {/* Summary cards */}
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
         <div className="bg-white dark:bg-slate-900 rounded-xl border p-5">
-          <p className="text-2xl font-bold text-green-600">{formatCurrency(totalPaid)}</p>
+          <p className="text-2xl font-bold text-green-600">{formatCurrency(totalPaid, currency)}</p>
           <p className="text-sm text-slate-500 mt-0.5">Total Paid</p>
         </div>
         <div className="bg-white dark:bg-slate-900 rounded-xl border p-5">
@@ -144,7 +146,7 @@ export default async function PaymentsPage() {
                       {formatDate(p.paid_at ?? p.created_at)}
                     </td>
                     <td className="px-5 py-4 font-semibold text-slate-900 dark:text-white">
-                      {formatCurrency(p.amount)}
+                      {formatCurrency(p.amount, currency)}
                     </td>
                     <td className="px-5 py-4">
                       <PaymentStatusBadge status={p.status} />

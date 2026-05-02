@@ -1,15 +1,19 @@
 import { createClient, createAdminClient } from '@/lib/supabase/server'
+import { getCurrency } from '@/lib/currency'
 import { Settings, Building2, Zap } from 'lucide-react'
 import { AddPropertyModal } from '@/components/admin/AddPropertyModal'
 import { EditProfileForm } from '@/components/admin/EditProfileForm'
 import { EditPropertyCard } from '@/components/admin/EditPropertyCard'
 import { BillTypeManager } from '@/components/admin/BillTypeManager'
+import { CurrencySelector } from '@/components/admin/CurrencySelector'
 
 export default async function AdminSettingsPage() {
   const authClient = await createClient()
   const { data: { user } } = await authClient.auth.getUser()
 
   const adminClient = createAdminClient()
+
+  const currency = await getCurrency()
 
   const [{ data: properties }, { data: profile }, { data: billTypes }, { data: billUsage }] = await Promise.all([
     (adminClient as any)
@@ -58,6 +62,10 @@ export default async function AdminSettingsPage() {
         <div className="mt-3 bg-white dark:bg-slate-900 rounded-xl border divide-y divide-slate-100 dark:divide-slate-800">
           <Row label="Email" value={profile?.email ?? '—'} />
           <Row label="Role" value={<span className="capitalize font-semibold text-green-600">{profile?.role}</span>} />
+          <div className="flex items-center justify-between px-5 py-4">
+            <span className="text-sm text-slate-500">Currency</span>
+            <CurrencySelector current={currency} />
+          </div>
         </div>
       </section>
 

@@ -1,8 +1,17 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
+import { cookies } from 'next/headers'
 import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { sendEmail, buildInvoiceGeneratedEmail } from '@/lib/notifications/email'
+
+export async function updateCurrency(currency: string) {
+  if (currency !== 'USD' && currency !== 'INR') return { error: 'Invalid currency' }
+  const store = await cookies()
+  store.set('apt_currency', currency, { path: '/', maxAge: 60 * 60 * 24 * 365, sameSite: 'lax' })
+  revalidatePath('/', 'layout')
+  return { error: null }
+}
 
 function revalidateAdminRoutes() {
   revalidatePath('/admin/settings')

@@ -1,5 +1,6 @@
 import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { formatCurrency } from '@/lib/utils'
+import { getCurrency } from '@/lib/currency'
 import { BarChart3, Users, Building2, TrendingUp, AlertCircle } from 'lucide-react'
 import { ReportFilters } from '@/components/admin/ReportFilters'
 
@@ -42,6 +43,7 @@ export default async function AdminReportsPage({ searchParams }: { searchParams:
   const authClient = await createClient()
   const { data: { user } } = await authClient.auth.getUser()
   const supabase = createAdminClient()
+  const currency = await getCurrency()
 
   // ── Base data ──────────────────────────────────────────────────────────────
   const [
@@ -203,16 +205,16 @@ export default async function AdminReportsPage({ searchParams }: { searchParams:
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         <KpiCard label="Active Tenants"    value={String(occupiedUnits)}           sub={`${vacantUnits} vacant of ${totalUnits}`}             icon={<Users className="w-4 h-4 text-green-600" />}    color="green" />
         <KpiCard label="Occupancy Rate"    value={`${occupancyRate}%`}             sub={`${occupiedUnits} occupied`}                          icon={<Building2 className="w-4 h-4 text-blue-600" />} color="blue" />
-        <KpiCard label="Monthly Rent Roll" value={formatCurrency(monthlyRentRoll)} sub={`${formatCurrency(monthlyRentRoll * 12)} / year`}     icon={<TrendingUp className="w-4 h-4 text-purple-600" />} color="purple" />
-        <KpiCard label="Outstanding"       value={formatCurrency(totalPending + totalOverdue)} sub={`${formatCurrency(totalOverdue)} overdue`} icon={<AlertCircle className="w-4 h-4 text-red-500" />} color="red" />
+        <KpiCard label="Monthly Rent Roll" value={formatCurrency(monthlyRentRoll, currency)} sub={`${formatCurrency(monthlyRentRoll * 12, currency)} / year`}     icon={<TrendingUp className="w-4 h-4 text-purple-600" />} color="purple" />
+        <KpiCard label="Outstanding"       value={formatCurrency(totalPending + totalOverdue, currency)} sub={`${formatCurrency(totalOverdue, currency)} overdue`} icon={<AlertCircle className="w-4 h-4 text-red-500" />} color="red" />
       </div>
 
       {/* Billing summary */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <SummaryCard label="Total Billed"    value={formatCurrency(totalBilled)}    color="slate" />
-        <SummaryCard label="Collected"       value={formatCurrency(totalCollected)} color="green" />
-        <SummaryCard label="Pending"         value={formatCurrency(totalPending)}   color="amber" />
-        <SummaryCard label="Overdue"         value={formatCurrency(totalOverdue)}   color="red" />
+        <SummaryCard label="Total Billed"    value={formatCurrency(totalBilled, currency)}    color="slate" />
+        <SummaryCard label="Collected"       value={formatCurrency(totalCollected, currency)} color="green" />
+        <SummaryCard label="Pending"         value={formatCurrency(totalPending, currency)}   color="amber" />
+        <SummaryCard label="Overdue"         value={formatCurrency(totalOverdue, currency)}   color="red" />
       </div>
 
       {/* Cash flow table */}
@@ -244,16 +246,16 @@ export default async function AdminReportsPage({ searchParams }: { searchParams:
                     </td>
                     <td className="px-5 py-3 text-slate-500">{m.count || '—'}</td>
                     <td className="px-5 py-3 font-semibold text-slate-900 dark:text-white">
-                      {m.billed > 0 ? formatCurrency(m.billed) : <span className="text-slate-300">—</span>}
+                      {m.billed > 0 ? formatCurrency(m.billed, currency) : <span className="text-slate-300">—</span>}
                     </td>
                     <td className="px-5 py-3 text-green-600 font-semibold">
-                      {m.collected > 0 ? formatCurrency(m.collected) : <span className="text-slate-300 font-normal">—</span>}
+                      {m.collected > 0 ? formatCurrency(m.collected, currency) : <span className="text-slate-300 font-normal">—</span>}
                     </td>
                     <td className="px-5 py-3 text-amber-600">
-                      {m.pending > 0 ? formatCurrency(m.pending) : <span className="text-slate-300">—</span>}
+                      {m.pending > 0 ? formatCurrency(m.pending, currency) : <span className="text-slate-300">—</span>}
                     </td>
                     <td className="px-5 py-3 text-red-600">
-                      {m.overdue > 0 ? formatCurrency(m.overdue) : <span className="text-slate-300">—</span>}
+                      {m.overdue > 0 ? formatCurrency(m.overdue, currency) : <span className="text-slate-300">—</span>}
                     </td>
                     <td className="px-5 py-3">
                       {m.billed > 0 ? (
@@ -274,10 +276,10 @@ export default async function AdminReportsPage({ searchParams }: { searchParams:
                 <tr className="bg-slate-50 dark:bg-slate-800 border-t-2 border-slate-200 dark:border-slate-700 font-semibold">
                   <td className="px-5 py-3 text-slate-700 dark:text-slate-300">Total</td>
                   <td className="px-5 py-3 text-slate-500">{invoices.length}</td>
-                  <td className="px-5 py-3 text-slate-900 dark:text-white">{formatCurrency(totalBilled)}</td>
-                  <td className="px-5 py-3 text-green-600">{formatCurrency(totalCollected)}</td>
-                  <td className="px-5 py-3 text-amber-600">{totalPending > 0 ? formatCurrency(totalPending) : '—'}</td>
-                  <td className="px-5 py-3 text-red-600">{totalOverdue > 0 ? formatCurrency(totalOverdue) : '—'}</td>
+                  <td className="px-5 py-3 text-slate-900 dark:text-white">{formatCurrency(totalBilled, currency)}</td>
+                  <td className="px-5 py-3 text-green-600">{formatCurrency(totalCollected, currency)}</td>
+                  <td className="px-5 py-3 text-amber-600">{totalPending > 0 ? formatCurrency(totalPending, currency) : '—'}</td>
+                  <td className="px-5 py-3 text-red-600">{totalOverdue > 0 ? formatCurrency(totalOverdue, currency) : '—'}</td>
                   <td className="px-5 py-3 text-slate-600 dark:text-slate-400">{collectionRate}% overall</td>
                 </tr>
               </tfoot>
@@ -314,10 +316,10 @@ export default async function AdminReportsPage({ searchParams }: { searchParams:
                     <tr key={yr} className="hover:bg-slate-50 dark:hover:bg-slate-800/50">
                       <td className="px-5 py-3 font-bold text-slate-900 dark:text-white">{yr}</td>
                       <td className="px-5 py-3 text-slate-500">{y.count}</td>
-                      <td className="px-5 py-3 font-semibold text-slate-900 dark:text-white">{formatCurrency(y.billed)}</td>
-                      <td className="px-5 py-3 text-green-600 font-semibold">{formatCurrency(y.collected)}</td>
-                      <td className="px-5 py-3 text-amber-600">{y.pending > 0 ? formatCurrency(y.pending) : '—'}</td>
-                      <td className="px-5 py-3 text-red-600">{y.overdue > 0 ? formatCurrency(y.overdue) : '—'}</td>
+                      <td className="px-5 py-3 font-semibold text-slate-900 dark:text-white">{formatCurrency(y.billed, currency)}</td>
+                      <td className="px-5 py-3 text-green-600 font-semibold">{formatCurrency(y.collected, currency)}</td>
+                      <td className="px-5 py-3 text-amber-600">{y.pending > 0 ? formatCurrency(y.pending, currency) : '—'}</td>
+                      <td className="px-5 py-3 text-red-600">{y.overdue > 0 ? formatCurrency(y.overdue, currency) : '—'}</td>
                       <td className="px-5 py-3">
                         <div className="flex items-center gap-2">
                           <div className="flex-1 h-1.5 bg-slate-100 dark:bg-slate-700 rounded-full">
@@ -362,12 +364,12 @@ export default async function AdminReportsPage({ searchParams }: { searchParams:
                       <p className="text-xs text-slate-400">{t.email}</p>
                     </td>
                     <td className="px-5 py-3 text-slate-600 dark:text-slate-400">{t.unit}</td>
-                    <td className="px-5 py-3 font-semibold text-slate-900 dark:text-white">{formatCurrency(t.monthlyRent)}</td>
-                    <td className="px-5 py-3 text-slate-700 dark:text-slate-300">{t.billed > 0 ? formatCurrency(t.billed) : '—'}</td>
-                    <td className="px-5 py-3 text-green-600">{t.collected > 0 ? formatCurrency(t.collected) : '—'}</td>
+                    <td className="px-5 py-3 font-semibold text-slate-900 dark:text-white">{formatCurrency(t.monthlyRent, currency)}</td>
+                    <td className="px-5 py-3 text-slate-700 dark:text-slate-300">{t.billed > 0 ? formatCurrency(t.billed, currency) : '—'}</td>
+                    <td className="px-5 py-3 text-green-600">{t.collected > 0 ? formatCurrency(t.collected, currency) : '—'}</td>
                     <td className="px-5 py-3">
                       {t.outstanding > 0
-                        ? <span className="text-red-600 font-semibold">{formatCurrency(t.outstanding)}</span>
+                        ? <span className="text-red-600 font-semibold">{formatCurrency(t.outstanding, currency)}</span>
                         : <span className="text-green-600 text-xs">All clear</span>}
                     </td>
                     <td className="px-5 py-3 text-slate-500 text-xs">
@@ -379,11 +381,11 @@ export default async function AdminReportsPage({ searchParams }: { searchParams:
               <tfoot>
                 <tr className="bg-slate-50 dark:bg-slate-800 border-t-2 border-slate-200 dark:border-slate-700 font-semibold">
                   <td className="px-5 py-3 text-slate-700 dark:text-slate-300" colSpan={2}>Total</td>
-                  <td className="px-5 py-3 text-slate-900 dark:text-white">{formatCurrency(monthlyRentRoll)}/mo</td>
-                  <td className="px-5 py-3 text-slate-700 dark:text-slate-300">{formatCurrency(totalBilled)}</td>
-                  <td className="px-5 py-3 text-green-600">{formatCurrency(totalCollected)}</td>
-                  <td className="px-5 py-3 text-red-600">{(totalPending + totalOverdue) > 0 ? formatCurrency(totalPending + totalOverdue) : '—'}</td>
-                  <td className="px-5 py-3 text-slate-400 text-xs">{formatCurrency(monthlyRentRoll * 12)}/yr</td>
+                  <td className="px-5 py-3 text-slate-900 dark:text-white">{formatCurrency(monthlyRentRoll, currency)}/mo</td>
+                  <td className="px-5 py-3 text-slate-700 dark:text-slate-300">{formatCurrency(totalBilled, currency)}</td>
+                  <td className="px-5 py-3 text-green-600">{formatCurrency(totalCollected, currency)}</td>
+                  <td className="px-5 py-3 text-red-600">{(totalPending + totalOverdue) > 0 ? formatCurrency(totalPending + totalOverdue, currency) : '—'}</td>
+                  <td className="px-5 py-3 text-slate-400 text-xs">{formatCurrency(monthlyRentRoll * 12, currency)}/yr</td>
                 </tr>
               </tfoot>
             </table>

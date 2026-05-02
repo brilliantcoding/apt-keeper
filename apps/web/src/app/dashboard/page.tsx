@@ -1,5 +1,6 @@
 import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { formatCurrency, formatDate } from '@/lib/utils'
+import { getCurrency } from '@/lib/currency'
 import { Receipt, Wrench, AlertCircle, CheckCircle } from 'lucide-react'
 import { PayButton } from '@/components/bills/PayButton'
 import { MaintenanceRequestCard } from '@/components/maintenance/MaintenanceRequestCard'
@@ -11,6 +12,7 @@ export default async function ResidentDashboard() {
 
   // Use adminClient for all data — avoids RLS join failures on bill_types etc.
   const admin = createAdminClient()
+  const currency = await getCurrency()
 
   const { data: leases } = await (admin as any)
     .from('leases')
@@ -69,7 +71,7 @@ export default async function ResidentDashboard() {
 
       {/* Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <StatCard label="Total Due" value={formatCurrency(totalDue)} icon={<Receipt className="w-5 h-5 text-green-600" />} accent="green" href="/dashboard/bills" />
+        <StatCard label="Total Due" value={formatCurrency(totalDue, currency)} icon={<Receipt className="w-5 h-5 text-green-600" />} accent="green" href="/dashboard/bills" />
         <StatCard label="Overdue Bills" value={String(overdueCount)} icon={<AlertCircle className="w-5 h-5 text-red-500" />} accent={overdueCount > 0 ? 'red' : 'slate'} href="/dashboard/bills" />
         <StatCard label="Open Requests" value={String(requests?.length ?? 0)} icon={<Wrench className="w-5 h-5 text-amber-500" />} accent="amber" href="/dashboard/maintenance" />
       </div>
@@ -97,8 +99,8 @@ export default async function ResidentDashboard() {
                     <span className={`text-xs font-semibold px-2 py-1 rounded-full ${displayStatus === 'overdue' ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700'}`}>
                       {displayStatus}
                     </span>
-                    <span className="font-semibold text-slate-900 dark:text-white">{formatCurrency(remaining)}</span>
-                    <PayButton invoiceId={inv.id} amount={remaining} />
+                    <span className="font-semibold text-slate-900 dark:text-white">{formatCurrency(remaining, currency)}</span>
+                    <PayButton invoiceId={inv.id} amount={remaining} currency={currency} />
                   </div>
                 </div>
               )

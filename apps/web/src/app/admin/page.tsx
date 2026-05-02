@@ -1,10 +1,12 @@
 import { createAdminClient } from '@/lib/supabase/server'
 import { formatCurrency } from '@/lib/utils'
+import { getCurrency } from '@/lib/currency'
 import { Receipt, Users, Wrench, TrendingUp } from 'lucide-react'
 import Link from 'next/link'
 
 export default async function AdminDashboard() {
   const supabase = createAdminClient()
+  const currency = await getCurrency()
 
   const [
     { count: totalInvoices },
@@ -48,7 +50,7 @@ export default async function AdminDashboard() {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard label="Total Invoices"  value={String(totalInvoices ?? 0)}   icon={<Receipt    className="w-5 h-5 text-green-600" />} href="/admin/invoices"     />
-        <StatCard label="Overdue Amount"  value={formatCurrency(totalOverdue)} icon={<TrendingUp className="w-5 h-5 text-red-500"   />} href="/admin/invoices"     />
+        <StatCard label="Overdue Amount"  value={formatCurrency(totalOverdue, currency)} icon={<TrendingUp className="w-5 h-5 text-red-500"   />} href="/admin/invoices"     />
         <StatCard label="Open Requests"   value={String(openRequests ?? 0)}    icon={<Wrench     className="w-5 h-5 text-amber-500" />} href="/admin/maintenance"  />
         <StatCard label="Active Leases"   value={String(activeLeases ?? 0)}    icon={<Users      className="w-5 h-5 text-blue-500"  />} href="/admin/residents"    />
       </div>
@@ -63,7 +65,7 @@ export default async function AdminDashboard() {
               </p>
               <div className="flex items-center gap-4">
                 <span className="text-xs text-slate-400">{new Date(p.paid_at!).toLocaleDateString()}</span>
-                <span className="font-semibold text-green-600">{formatCurrency(p.amount)}</span>
+                <span className="font-semibold text-green-600">{formatCurrency(p.amount, currency)}</span>
               </div>
             </div>
           ))}

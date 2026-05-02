@@ -1,5 +1,6 @@
 import { createClient, createAdminClient } from "@/lib/supabase/server"
 import { formatDate, formatCurrency } from '@/lib/utils'
+import { getCurrency } from '@/lib/currency'
 import { Users } from 'lucide-react'
 import { AssignLeaseModal } from '@/components/admin/AssignLeaseModal'
 
@@ -7,6 +8,7 @@ export default async function AdminResidentsPage() {
   const authClient = await createClient()
   const supabase = createAdminClient()
   const { data: { user } } = await authClient.auth.getUser()
+  const currency = await getCurrency()
 
   const [{ data: residents }, { data: allUnits }, { data: allLeases }] = await Promise.all([
     (supabase as any)
@@ -118,7 +120,7 @@ export default async function AdminResidentsPage() {
                     )}
                   </td>
                   <td className="px-5 py-4 font-semibold text-slate-900 dark:text-white">
-                    {lease ? formatCurrency(lease.monthly_rent) : '—'}
+                    {lease ? formatCurrency(lease.monthly_rent, currency) : '—'}
                   </td>
                   <td className="px-5 py-4 text-slate-500 text-xs">
                     {lease ? (
@@ -130,7 +132,7 @@ export default async function AdminResidentsPage() {
                   </td>
                   <td className="px-5 py-4">
                     {outstanding > 0 ? (
-                      <span className="font-semibold text-red-600">{formatCurrency(outstanding)}</span>
+                      <span className="font-semibold text-red-600">{formatCurrency(outstanding, currency)}</span>
                     ) : (
                       <span className="text-green-600 font-semibold">Paid up</span>
                     )}

@@ -1,5 +1,6 @@
 import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { formatCurrency, formatDate } from '@/lib/utils'
+import { getCurrency } from '@/lib/currency'
 import { PayButton } from '@/components/bills/PayButton'
 import Link from 'next/link'
 
@@ -8,6 +9,7 @@ export default async function ResidentBillsPage() {
   const { data: { user } } = await supabase.auth.getUser()
 
   const admin = createAdminClient()
+  const currency = await getCurrency()
 
   const { data: leases } = await (admin as any)
     .from('leases')
@@ -73,7 +75,7 @@ export default async function ResidentBillsPage() {
                     {bill?.billing_period_start ? `${formatDate(bill.billing_period_start)} – ${formatDate(bill.billing_period_end)}` : '—'}
                   </td>
                   <td className="px-5 py-4 text-slate-600 dark:text-slate-400">{formatDate(inv.due_date)}</td>
-                  <td className="px-5 py-4 font-semibold text-slate-900 dark:text-white">{formatCurrency(remaining)}</td>
+                  <td className="px-5 py-4 font-semibold text-slate-900 dark:text-white">{formatCurrency(remaining, currency)}</td>
                   <td className="px-5 py-4"><StatusBadge status={inv.status} /></td>
                   <td className="px-5 py-4 text-right">
                     <div className="flex items-center justify-end gap-2">
@@ -86,7 +88,7 @@ export default async function ResidentBillsPage() {
                         PDF
                       </a>
                       {inv.status !== 'paid' && remaining > 0 && paymentsEnabled && (
-                        <PayButton invoiceId={inv.id} amount={remaining} />
+                        <PayButton invoiceId={inv.id} amount={remaining} currency={currency} />
                       )}
                     </div>
                   </td>
