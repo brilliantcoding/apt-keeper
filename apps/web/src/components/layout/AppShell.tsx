@@ -235,20 +235,22 @@ export function AppShell({ role, userName, banner, children }: AppShellProps) {
             </button>
 
             {/* Breadcrumb */}
-            <nav className="flex items-center gap-1 text-sm min-w-0 overflow-hidden">
+            <nav className="flex-1 flex items-center gap-1 text-sm min-w-0 overflow-hidden">
               {crumbs.map((crumb, i) => (
-                <span key={crumb.href} className="flex items-center gap-1 min-w-0 shrink-0">
+                <span key={crumb.href} className="contents">
+                  {/* Separator — hidden on mobile when parent crumb is also hidden */}
                   {i > 0 && (
-                    <ChevronRight className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                    <ChevronRight className="hidden sm:block w-3.5 h-3.5 text-slate-400 shrink-0" />
                   )}
                   {crumb.isLast ? (
                     <span className="font-semibold text-slate-900 dark:text-white truncate">
                       {crumb.label}
                     </span>
                   ) : (
+                    /* Parent segments: visible on sm+, hidden on mobile */
                     <Link
                       href={crumb.href}
-                      className="text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 truncate hidden sm:block"
+                      className="hidden sm:block text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 truncate shrink-0"
                     >
                       {crumb.label}
                     </Link>
