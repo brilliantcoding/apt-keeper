@@ -14,7 +14,18 @@ export async function updateCurrency(currency: string) {
 }
 
 export async function sendPasswordReset(userId: string) {
+  const authClient = await createClient()
+  const { data: { user } } = await authClient.auth.getUser()
+  if (!user) return { error: 'Unauthorized' }
+
   const supabase = createAdminClient()
+  const { data: callerProfile } = await (supabase as any)
+    .from('users')
+    .select('role')
+    .eq('id', user.id)
+    .single()
+  if (callerProfile?.role !== 'manager') return { error: 'Forbidden' }
+
   const { data: userData } = await (supabase as any)
     .from('users')
     .select('email')
