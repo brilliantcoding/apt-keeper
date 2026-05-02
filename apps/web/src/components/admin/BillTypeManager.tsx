@@ -21,6 +21,7 @@ export function BillTypeManager({
   const [error, setError] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
   const [deletingId, setDeletingId] = useState<string | null>(null)
+  const [deleteError, setDeleteError] = useState<string | null>(null)
 
   function resetForm() {
     setName('')
@@ -51,9 +52,15 @@ export function BillTypeManager({
   }
 
   function handleDelete(id: string) {
+    setDeleteError(null)
     startTransition(async () => {
       const result = await deleteBillType(id)
-      if (!result.error) {
+      if (result.error) {
+        const isFK = result.error.includes('foreign key') || result.error.includes('violates')
+        setDeleteError(isFK
+          ? 'Cannot delete — this bill type is used by existing bills.'
+          : result.error)
+      } else {
         setDeletingId(null)
         router.refresh()
       }
@@ -78,14 +85,21 @@ export function BillTypeManager({
             )}
           </div>
           {deletingId === bt.id ? (
-            <div className="flex items-center gap-1.5">
-              <span className="text-xs text-red-600">Delete?</span>
-              <button onClick={() => handleDelete(bt.id)} disabled={isPending} className="text-xs px-2 py-1 bg-red-600 hover:bg-red-700 text-white rounded-lg disabled:opacity-50">
-                {isPending ? '…' : 'Yes'}
-              </button>
-              <button onClick={() => setDeletingId(null)} className="text-xs px-2 py-1 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-600 dark:text-slate-400">
-                No
-              </button>
+            <div className="flex flex-col items-end gap-1">
+              {deleteError && (
+                <p className="text-xs text-red-600 max-w-xs text-right">{deleteError}</p>
+              )}
+              <div className="flex items-center gap-1.5">
+                <span className="text-xs text-red-600">{deleteError ? 'In use' : 'Delete?'}</span>
+                {!deleteError && (
+                  <button onClick={() => handleDelete(bt.id)} disabled={isPending} className="text-xs px-2 py-1 bg-red-600 hover:bg-red-700 text-white rounded-lg disabled:opacity-50">
+                    {isPending ? '…' : 'Yes'}
+                  </button>
+                )}
+                <button onClick={() => { setDeletingId(null); setDeleteError(null) }} className="text-xs px-2 py-1 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-600 dark:text-slate-400">
+                  {deleteError ? 'OK' : 'No'}
+                </button>
+              </div>
             </div>
           ) : (
             <button
