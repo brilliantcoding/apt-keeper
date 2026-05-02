@@ -1,11 +1,12 @@
 import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { getCurrency } from '@/lib/currency'
-import { Settings, Building2, Zap } from 'lucide-react'
+import { Settings, Building2, Zap, Users } from 'lucide-react'
 import { AddPropertyModal } from '@/components/admin/AddPropertyModal'
 import { EditProfileForm } from '@/components/admin/EditProfileForm'
 import { EditPropertyCard } from '@/components/admin/EditPropertyCard'
 import { BillTypeManager } from '@/components/admin/BillTypeManager'
 import { CurrencySelector } from '@/components/admin/CurrencySelector'
+import { ResidentPasswordResetForm } from '@/components/admin/ResidentPasswordResetForm'
 
 export default async function AdminSettingsPage() {
   const authClient = await createClient()
@@ -15,7 +16,7 @@ export default async function AdminSettingsPage() {
 
   const currency = await getCurrency()
 
-  const [{ data: properties }, { data: profile }, { data: billTypes }, { data: billUsage }] = await Promise.all([
+  const [{ data: properties }, { data: profile }, { data: billTypes }, { data: billUsage }, { data: residents }] = await Promise.all([
     (adminClient as any)
       .from('properties')
       .select('id, name, address, created_at, payments_enabled')
@@ -34,6 +35,11 @@ export default async function AdminSettingsPage() {
     (adminClient as any)
       .from('bills')
       .select('bill_type_id'),
+    (adminClient as any)
+      .from('users')
+      .select('id, full_name, email')
+      .eq('role', 'resident')
+      .order('full_name', { ascending: true }),
   ])
 
   const usedBillTypeIds = new Set(
@@ -98,6 +104,16 @@ export default async function AdminSettingsPage() {
           Bill Types
         </h2>
         <BillTypeManager billTypes={(billTypes ?? []) as any[]} usedIds={usedBillTypeIds} />
+      </section>
+
+      {/* Resident Access */}
+      <section>
+        <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-1 flex items-center gap-2">
+          <Users className="w-5 h-5" />
+          Resident Access
+        </h2>
+        <p className="text-sm text-slate-500 mb-4">Send a password reset email to any resident.</p>
+        <ResidentPasswordResetForm residents={(residents ?? []) as any[]} />
       </section>
     </div>
   )
