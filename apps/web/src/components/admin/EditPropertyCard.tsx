@@ -14,7 +14,7 @@ export function EditPropertyCard({
   const [editing, setEditing] = useState(false)
   const [name, setName] = useState(property.name)
   const [address, setAddress] = useState(property.address)
-  const [paymentsEnabled, setPaymentsEnabled] = useState(property.payments_enabled ?? false)
+  const [paymentsEnabled, setPaymentsEnabled] = useState(property.payments_enabled ?? true)
   const [error, setError] = useState<string | null>(null)
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [isPending, startTransition] = useTransition()

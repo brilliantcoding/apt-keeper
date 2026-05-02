@@ -32,7 +32,7 @@ export default async function ResidentBillsPage() {
         .limit(1)
         .single()
     : { data: null }
-  const paymentsEnabled = leaseWithUnit?.units?.properties?.payments_enabled ?? false
+  const paymentsEnabled = leaseWithUnit?.units?.properties?.payments_enabled ?? true
 
   return (
     <div className="space-y-6">
