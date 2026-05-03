@@ -39,16 +39,20 @@ export async function POST(req: NextRequest) {
       .in('status', ['pending', 'overdue'])
       .eq('due_date', targetDateStr)
 
-    for (const invoice of invoices ?? []) {
-      // Skip if this stage was already sent
-      const { data: existing } = await supabase
-        .from('reminders')
-        .select('id')
-        .eq('invoice_id', invoice.id)
-        .eq('stage', stageConfig.stage)
-        .maybeSingle()
+    if (!invoices?.length) continue
 
-      if (existing) continue
+    // Batch-check which invoices already have a reminder for this stage
+    const invoiceIds = invoices.map((i) => i.id)
+    const { data: sentReminders } = await supabase
+      .from('reminders')
+      .select('invoice_id')
+      .in('invoice_id', invoiceIds)
+      .eq('stage', stageConfig.stage)
+
+    const alreadySent = new Set((sentReminders ?? []).map((r) => r.invoice_id))
+
+    for (const invoice of invoices) {
+      if (alreadySent.has(invoice.id)) continue
 
       await supabase.from('reminders').insert({
         invoice_id: invoice.id,

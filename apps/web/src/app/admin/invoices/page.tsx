@@ -13,22 +13,10 @@ export default async function AdminInvoicesPage() {
       id, amount_due, amount_paid, status, due_date, created_at,
       lease_id,
       bills(bill_types(name, category)),
-      units(unit_number, properties(name))
+      units(unit_number, properties(name)),
+      leases(users(full_name, email))
     `)
     .order('created_at', { ascending: false })
-
-  // Get resident info via leases separately
-  const leaseIds = (invoices ?? []).map((i: any) => i.lease_id).filter(Boolean)
-  const { data: leases } = leaseIds.length
-    ? await (supabase as any)
-        .from('leases')
-        .select('id, resident_id, users(full_name, email)')
-        .in('id', leaseIds)
-    : { data: [] }
-
-  const leaseMap = Object.fromEntries(
-    ((leases ?? []) as any[]).map((l: any) => [l.id, l])
-  )
 
   const totalDue = (invoices ?? []).reduce((s: number, i: any) => s + i.amount_due, 0)
   const totalPaid = (invoices ?? []).reduce((s: number, i: any) => s + i.amount_paid, 0)
@@ -70,8 +58,7 @@ export default async function AdminInvoicesPage() {
           </thead>
           <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
             {((invoices ?? []) as any[]).map((inv: any) => {
-              const lease = leaseMap[inv.lease_id]
-              const resident = lease?.users
+              const resident = (inv.leases as any)?.users
               const unit = inv.units
               const billType = inv.bills?.bill_types
               const remaining = inv.amount_due - inv.amount_paid

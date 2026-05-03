@@ -73,6 +73,7 @@ export default async function AdminBillsPage() {
               const totalDue = invoices.reduce((s: number, i: any) => s + i.amount_due, 0)
               const totalPaid = invoices.reduce((s: number, i: any) => s + i.amount_paid, 0)
               const paidCount = invoices.filter((i: any) => i.status === 'paid').length
+              const allPaid = invoices.length > 0 && paidCount === invoices.length
               return (
                 <tr key={bill.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50">
                   <td className="px-5 py-4">
@@ -108,7 +109,11 @@ export default async function AdminBillsPage() {
                     </div>
                   </td>
                   <td className="px-5 py-4 text-right">
-                    <EditBillModal bill={bill as any} billTypes={billTypes ?? []} />
+                    {allPaid ? (
+                      <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-green-100 text-green-700">Fully Paid</span>
+                    ) : (
+                      <EditBillModal bill={bill as any} billTypes={billTypes ?? []} />
+                    )}
                   </td>
                 </tr>
               )

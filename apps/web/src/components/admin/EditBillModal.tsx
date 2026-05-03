@@ -29,7 +29,6 @@ export function EditBillModal({ bill, billTypes }: { bill: Bill; billTypes: Bill
   const [open, setOpen]               = useState(false)
   const [loading, setLoading]         = useState(false)
   const [error, setError]             = useState<string | null>(null)
-  const [recalcMsg, setRecalcMsg]     = useState<string | null>(null)
   const [amount, setAmount]           = useState(String(bill.amount / 100))
   const [periodStart, setPeriodStart] = useState(bill.billing_period_start?.slice(0, 10) ?? '')
   const [periodEnd, setPeriodEnd]     = useState(bill.billing_period_end?.slice(0, 10) ?? '')
@@ -40,7 +39,6 @@ export function EditBillModal({ bill, billTypes }: { bill: Bill; billTypes: Bill
   function close() {
     setOpen(false)
     setError(null)
-    setRecalcMsg(null)
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -69,18 +67,9 @@ export function EditBillModal({ bill, billTypes }: { bill: Bill; billTypes: Bill
     }
 
     await revalidateBills()
-
-    // Recalculate pending invoices so residents see updated amounts immediately
-    const { count, error: recalcErr } = await recalculatePendingInvoices(bill.id)
-    if (recalcErr) {
-      setRecalcMsg(`Bill saved. Could not recalculate invoices: ${recalcErr}`)
-    } else if (count > 0) {
-      setRecalcMsg(`Bill saved. ${count} pending invoice${count > 1 ? 's' : ''} recalculated with new split amounts.`)
-    } else {
-      setRecalcMsg('Bill saved. No pending invoices to recalculate.')
-    }
-
+    recalculatePendingInvoices(bill.id)
     setLoading(false)
+    close()
   }
 
   const inputCls = 'w-full px-3 py-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-green-500 text-sm'
@@ -155,9 +144,6 @@ export function EditBillModal({ bill, billTypes }: { bill: Bill; billTypes: Bill
               {error && (
                 <p className="text-sm text-red-600 bg-red-50 dark:bg-red-900/20 px-3 py-2 rounded-lg">{error}</p>
               )}
-              {recalcMsg && (
-                <p className="text-sm text-green-700 bg-green-50 dark:bg-green-900/20 px-3 py-2 rounded-lg">{recalcMsg}</p>
-              )}
 
               <div className="flex gap-3 pt-2">
                 <button
@@ -169,10 +155,10 @@ export function EditBillModal({ bill, billTypes }: { bill: Bill; billTypes: Bill
                 </button>
                 <button
                   type="submit"
-                  disabled={loading || !!recalcMsg}
+                  disabled={loading}
                   className="flex-1 py-2.5 bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white rounded-lg font-semibold transition-colors text-sm"
                 >
-                  {loading ? 'Saving…' : recalcMsg ? 'Saved ✓' : 'Save Changes'}
+                  {loading ? 'Saving…' : 'Save Changes'}
                 </button>
               </div>
             </form>

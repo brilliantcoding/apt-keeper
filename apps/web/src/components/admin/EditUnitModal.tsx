@@ -17,14 +17,13 @@ export function EditUnitModal({ unit }: { unit: Unit }) {
   const [open, setOpen]           = useState(false)
   const [loading, setLoading]     = useState(false)
   const [error, setError]         = useState<string | null>(null)
-  const [saved, setSaved]         = useState<string | null>(null)
   const [unitNumber, setUnitNumber] = useState(unit.unit_number)
   const [floor, setFloor]         = useState(unit.floor != null ? String(unit.floor) : '')
   const [sqFt, setSqFt]           = useState(unit.sq_ft != null ? String(unit.sq_ft) : '')
   const [bedrooms, setBedrooms]   = useState(String(unit.bedrooms))
   const [bathrooms, setBathrooms] = useState(String(unit.bathrooms))
 
-  function close() { setOpen(false); setError(null); setSaved(null) }
+  function close() { setOpen(false); setError(null) }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -38,8 +37,8 @@ export function EditUnitModal({ unit }: { unit: Unit }) {
       bathrooms: parseFloat(bathrooms),
     })
     if (result.error) { setError(result.error); setLoading(false); return }
-    setSaved('Unit saved. Pending invoices recalculated with updated unit data.')
     setLoading(false)
+    close()
   }
 
   const inputCls = 'w-full px-3 py-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-green-500 text-sm'
@@ -119,9 +118,6 @@ export function EditUnitModal({ unit }: { unit: Unit }) {
               {error && (
                 <p className="text-sm text-red-600 bg-red-50 dark:bg-red-900/20 px-3 py-2 rounded-lg">{error}</p>
               )}
-              {saved && (
-                <p className="text-sm text-green-700 bg-green-50 dark:bg-green-900/20 px-3 py-2 rounded-lg">{saved}</p>
-              )}
 
               <div className="flex gap-3 pt-2">
                 <button
@@ -133,10 +129,10 @@ export function EditUnitModal({ unit }: { unit: Unit }) {
                 </button>
                 <button
                   type="submit"
-                  disabled={loading || !!saved}
+                  disabled={loading}
                   className="flex-1 py-2.5 bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white rounded-lg font-semibold transition-colors text-sm"
                 >
-                  {loading ? 'Saving…' : saved ? 'Saved ✓' : 'Save Changes'}
+                  {loading ? 'Saving…' : 'Save Changes'}
                 </button>
               </div>
             </form>

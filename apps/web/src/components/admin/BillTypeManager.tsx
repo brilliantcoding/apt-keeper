@@ -23,6 +23,8 @@ export function BillTypeManager({
   const [error, setError] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
   const [deletingId, setDeletingId] = useState<string | null>(null)
+  const [deleteError, setDeleteError] = useState<string | null>(null)
+  const [deleteLoading, setDeleteLoading] = useState(false)
 
   function resetForm() {
     setName('')
@@ -52,14 +54,18 @@ export function BillTypeManager({
     })
   }
 
-  function handleDelete(id: string) {
-    startTransition(async () => {
-      const result = await deleteBillType(id)
-      if (!result.error) {
-        setDeletingId(null)
-        router.refresh()
-      }
-    })
+  async function handleDelete(id: string) {
+    setDeleteError(null)
+    setDeleteLoading(true)
+    const result = await deleteBillType(id)
+    setDeleteLoading(false)
+    if (result.error) {
+      setDeleteError(result.error)
+      setDeletingId(null)
+    } else {
+      setDeletingId(null)
+      router.refresh()
+    }
   }
 
   const inputClass =
@@ -88,8 +94,8 @@ export function BillTypeManager({
             /* Confirm delete */
             <div className="flex items-center gap-1.5">
               <span className="text-xs text-red-600">Delete?</span>
-              <button onClick={() => handleDelete(bt.id)} disabled={isPending} className="text-xs px-2 py-1 bg-red-600 hover:bg-red-700 text-white rounded-lg disabled:opacity-50">
-                {isPending ? '…' : 'Yes'}
+              <button onClick={() => handleDelete(bt.id)} disabled={deleteLoading} className="text-xs px-2 py-1 bg-red-600 hover:bg-red-700 text-white rounded-lg disabled:opacity-50">
+                {deleteLoading ? '…' : 'Yes'}
               </button>
               <button onClick={() => setDeletingId(null)} className="text-xs px-2 py-1 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-600 dark:text-slate-400">
                 No
@@ -106,6 +112,12 @@ export function BillTypeManager({
           )}
         </div>
       ))}
+
+      {deleteError && (
+        <div className="px-5 py-3 border-t border-slate-100 dark:border-slate-800">
+          <p className="text-sm text-red-600 bg-red-50 dark:bg-red-900/20 px-3 py-2 rounded-lg">{deleteError}</p>
+        </div>
+      )}
 
       {/* Add form */}
       {showForm ? (

@@ -16,7 +16,7 @@ export default async function AdminSettingsPage() {
 
   const currency = await getCurrency()
 
-  const [{ data: properties }, { data: profile }, { data: billTypes }, { data: billUsage }, { data: residents }] = await Promise.all([
+  const [{ data: properties }, { data: profile }, { data: billTypes }, { data: billUsage }, { data: splitRuleUsage }, { data: residents }] = await Promise.all([
     (adminClient as any)
       .from('properties')
       .select('id, name, address, created_at, payments_enabled')
@@ -31,10 +31,11 @@ export default async function AdminSettingsPage() {
       .from('bill_types')
       .select('*')
       .order('name'),
-    // Which bill_type_ids are referenced by at least one bill?
     (adminClient as any)
       .from('bills')
       .select('bill_type_id'),
+    // kept for destructuring order
+    Promise.resolve({ data: [] }),
     (adminClient as any)
       .from('users')
       .select('id, full_name, email')

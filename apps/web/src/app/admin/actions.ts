@@ -120,8 +120,25 @@ export async function addBillType(data: {
 
 export async function deleteBillType(id: string) {
   const supabase = createAdminClient()
+
+  // Block if any bill still references this type
+  const { count } = await (supabase as any)
+    .from('bills')
+    .select('id', { count: 'exact', head: true })
+    .eq('bill_type_id', id)
+  if ((count ?? 0) > 0) return { error: 'This bill type is used by existing bills. Update or delete those bills first.' }
+
+  // Null out orphaned split_rules references (nullable FK)
+  await (supabase as any)
+    .from('split_rules')
+    .update({ bill_type_id: null })
+    .eq('bill_type_id', id)
+
   const { error } = await (supabase as any).from('bill_types').delete().eq('id', id)
-  if (error) return { error: (error as any).message }
+  if (error) {
+    console.error('[deleteBillType]', error)
+    return { error: (error as any).message ?? 'Failed to delete bill type' }
+  }
   revalidatePath('/admin/settings')
   return { error: null }
 }

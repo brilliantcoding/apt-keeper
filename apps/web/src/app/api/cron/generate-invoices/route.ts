@@ -23,6 +23,17 @@ export async function POST(req: NextRequest) {
 
   const invoicesToInsert: any[] = []
 
+  // Batch-fetch all existing invoices for active bills to avoid N+1 checks
+  const activeBillIds = activeBills.map((b) => b.id)
+  const { data: existingInvoices } = await supabase
+    .from('invoices')
+    .select('bill_id, unit_id')
+    .in('bill_id', activeBillIds)
+
+  const existingSet = new Set(
+    (existingInvoices ?? []).map((i) => `${i.bill_id}:${i.unit_id}`)
+  )
+
   for (const bill of activeBills) {
     const property = bill.properties as any
     const units: any[] = property?.units ?? []
@@ -35,29 +46,19 @@ export async function POST(req: NextRequest) {
     for (const unit of activeUnits) {
       const activeLease = unit.leases?.find((l: any) => l.status === 'active')
       if (!activeLease) continue
+      if (existingSet.has(`${bill.id}:${unit.id}`)) continue
 
       const amount = splitAmounts[unit.id] ?? 0
-
-      // One invoice per bill+unit — no due_date in check to avoid duplicates
-      const { data: existing } = await supabase
-        .from('invoices')
-        .select('id')
-        .eq('bill_id', bill.id)
-        .eq('unit_id', unit.id)
-        .maybeSingle()
-
-      if (!existing) {
-        invoicesToInsert.push({
-          unit_id: unit.id,
-          lease_id: activeLease.id,
-          bill_id: bill.id,
-          amount_due: amount,
-          amount_paid: 0,
-          status: 'pending',
-          due_date: (bill as any).due_date,
-          generation_batch_id: generationBatchId,
-        })
-      }
+      invoicesToInsert.push({
+        unit_id: unit.id,
+        lease_id: activeLease.id,
+        bill_id: bill.id,
+        amount_due: amount,
+        amount_paid: 0,
+        status: 'pending',
+        due_date: (bill as any).due_date,
+        generation_batch_id: generationBatchId,
+      })
     }
   }
 
