@@ -9,6 +9,7 @@ export default function LoginPage() {
   const supabase = createClient()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [mode, setMode] = useState<'login' | 'signup'>('login')
@@ -23,6 +24,11 @@ export default function LoginPage() {
       if (error) setError(error.message)
       else router.push('/dashboard')
     } else {
+      if (password !== confirmPassword) {
+        setError('Passwords do not match.')
+        setLoading(false)
+        return
+      }
       const { error } = await supabase.auth.signUp({
         email,
         password,
@@ -80,6 +86,22 @@ export default function LoginPage() {
             />
           </div>
 
+          {mode === 'signup' && (
+            <div>
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                Confirm Password
+              </label>
+              <input
+                type="password"
+                required
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                className="w-full px-4 py-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-green-500"
+                placeholder="••••••••"
+              />
+            </div>
+          )}
+
           {error && (
             <p className="text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 px-3 py-2 rounded-lg">
               {error}
@@ -98,7 +120,7 @@ export default function LoginPage() {
         <p className="text-center text-sm text-slate-500 mt-6">
           {mode === 'login' ? "Don't have an account? " : 'Already have an account? '}
           <button
-            onClick={() => setMode(mode === 'login' ? 'signup' : 'login')}
+            onClick={() => { setMode(mode === 'login' ? 'signup' : 'login'); setError(null); setConfirmPassword('') }}
             className="text-green-600 hover:underline font-medium"
           >
             {mode === 'login' ? 'Sign up' : 'Sign in'}

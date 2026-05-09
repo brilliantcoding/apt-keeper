@@ -1,11 +1,21 @@
-import { Resend } from 'resend'
-
-const FROM = process.env.RESEND_FROM_EMAIL ?? 'noreply@aptkeeper.app'
+const FROM_EMAIL = process.env.BREVO_FROM_EMAIL ?? 'aptkeeper.notifications@gmail.com'
+const FROM_NAME = process.env.BREVO_FROM_NAME ?? 'AptKeeper Notifications'
 
 export async function sendEmail(to: string, subject: string, html: string) {
-  if (!process.env.RESEND_API_KEY) return
-  const resend = new Resend(process.env.RESEND_API_KEY)
-  return resend.emails.send({ from: FROM, to, subject, html })
+  if (!process.env.BREVO_API_KEY) return
+  await fetch('https://api.brevo.com/v3/smtp/email', {
+    method: 'POST',
+    headers: {
+      'api-key': process.env.BREVO_API_KEY,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      sender: { name: FROM_NAME, email: FROM_EMAIL },
+      to: [{ email: to }],
+      subject,
+      htmlContent: html,
+    }),
+  })
 }
 
 export function buildPaymentConfirmationEmail(params: {
